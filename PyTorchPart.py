@@ -29,7 +29,12 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, 3)
         self.pool = nn.MaxPool2d(2, 2)
-        self.fc1 = nn.Linear(32 * 30 * 30, 128)
+        # Вычислите размерность после пулинга на основе размера изображения и операции MaxPool2d
+        # 32 - количество фильтров в сверточном слое, 30x30 - размер данных после свертки и пулинга
+        # При условии, что размер изображения после изменения (transforms.Resize) составляет 128x128
+        pool_output_size = 32 * 30 * 30
+        self.fc1 = nn.Linear(pool_output_size, 128)
+        self.fc1 = nn.Linear(127008, 128)
         self.fc2 = nn.Linear(128, 2)
 
     def forward(self, x):
@@ -46,7 +51,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 # Обучение модели
-for epoch in range(1000):  # Пример: 1000 эпох
+for epoch in range(1):  # Пример: 1000 эпох
     running_loss = 0.0
     for i, data in enumerate(train_loader, 0):
         inputs, labels = data
@@ -81,13 +86,16 @@ total = 0
 predictions = []
 
 with torch.no_grad():
-    for data in test_loader:
+    for i, data in enumerate(test_data):  # Используем enumerate, чтобы получить индекс
         images, labels = data
         outputs = net(images)
         _, predicted = torch.max(outputs.data, 1)
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
         predictions.extend(predicted.tolist())
+
+        # Теперь получаем путь к изображению
+        image_path = train_data.samples[train_data.targets[i]][0]
 
 print(f'Точность на тестовом наборе данных: {100 * correct / total}%')
 
