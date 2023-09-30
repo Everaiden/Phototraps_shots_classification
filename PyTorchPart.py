@@ -14,11 +14,11 @@ ImageFile.LOAD_TRUNCATED_IMAGES = True
 transform = transforms.Compose([transforms.Resize((128, 128)),
                                 transforms.ToTensor()])
 
-#train_data = datasets.ImageFolder("E:\Python\Phototraps_shots_classification\Classes", transform=transform)
-#test_data = datasets.ImageFolder("E:\Python\Phototraps_shots_classification\Train", transform=transform)
+train_data = datasets.ImageFolder(".\Classes", transform=transform)
+test_data = datasets.ImageFolder(".\Train", transform=transform)
 
-train_data = datasets.ImageFolder('.\Classes', transform=transform)
-test_data = DataLoader(train_data, batch_size=32, shuffle=True)
+#train_data = datasets.ImageFolder('.\Classes', transform=transform)
+#test_data = DataLoader(train_data, batch_size=32, shuffle=True)
 
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_data, batch_size=32, shuffle=True)
@@ -34,10 +34,14 @@ class Net(nn.Module):
         # Вычислите размерность после пулинга на основе размера изображения и операции MaxPool2d
         # 32 - количество фильтров в сверточном слое, 30x30 - размер данных после свертки и пулинга
         # При условии, что размер изображения после изменения (transforms.Resize) составляет 128x128
-        pool_output_size = 32 * 30 * 30
-        self.fc1 = nn.Linear(pool_output_size, 128)
-        self.fc1 = nn.Linear(127008, 128)
+
+        # Определение линейных слоев
         self.fc2 = nn.Linear(128, 2)
+        if self.fc2 == 3969:
+            self.fc1 = nn.Linear(3969, 128)  # 32 channels, 30x30 output size after conv and pool
+        else:
+            self.fc1 = nn.Linear(127008, 128)  # 32 channels, 30x30 output size after conv and pool
+        #self.fc2 = nn.Linear(128, 2)
 
     def forward(self, x):
         x = self.pool(torch.nn.functional.relu(self.conv1(x)))
@@ -53,7 +57,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 # Обучение модели
-for epoch in range(10):  # Пример: 1000 эпох
+for epoch in range(1):  # Пример: 1000 эпох
     running_loss = 0.0
     for i, data in enumerate(train_loader, 0):
         inputs, labels = data
