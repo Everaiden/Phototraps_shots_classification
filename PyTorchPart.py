@@ -9,16 +9,15 @@ import torchvision.transforms.functional as F
 from PIL import Image, ImageFile
 ImageFile.LOAD_TRUNCATED_IMAGES = True
 
-
 # Предварительная обработка данных и загрузка
 transform = transforms.Compose([transforms.Resize((128, 128)),
                                 transforms.ToTensor()])
 
-train_data = datasets.ImageFolder(".\Classes", transform=transform)
-test_data = datasets.ImageFolder(".\Train", transform=transform)
+#train_data = datasets.ImageFolder(".\Classes", transform=transform)
+#test_data = datasets.ImageFolder(".\Train", transform=transform)
 
-#train_data = datasets.ImageFolder('.\Classes', transform=transform)
-#test_data = DataLoader(train_data, batch_size=32, shuffle=True)
+train_data = datasets.ImageFolder('.\Classes', transform=transform)
+test_data = DataLoader(train_data, batch_size=32, shuffle=True)
 
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_data, batch_size=32, shuffle=True)
@@ -31,9 +30,6 @@ class Net(nn.Module):
         super(Net, self).__init__()
         self.conv1 = nn.Conv2d(3, 32, 3)
         self.pool = nn.MaxPool2d(2, 2)
-        # Вычислите размерность после пулинга на основе размера изображения и операции MaxPool2d
-        # 32 - количество фильтров в сверточном слое, 30x30 - размер данных после свертки и пулинга
-        # При условии, что размер изображения после изменения (transforms.Resize) составляет 128x128
 
         # Определение линейных слоев
         self.fc2 = nn.Linear(128, 2)
@@ -78,9 +74,8 @@ if not os.path.exists('Trash'):
     os.makedirs('Trash')
 
 # Функция для переноса изображений в соответствующие папки
-def move_images(predictions):
-    for i, prediction in enumerate(predictions):
-        image_path = [sample[0] for sample in train_data.imgs]  # Путь к изображению
+def move_images(predictions, image_paths):
+    for prediction, image_path in zip(predictions, image_paths):
         if prediction == 0:  # Предсказание: качественное
             shutil.copy(image_path, 'Useful')
         else:  # Предсказание: некачественное
@@ -89,19 +84,24 @@ def move_images(predictions):
 # Оценка модели на тестовом наборе данных
 correct = 0
 total = 0
-predictions = []
+predictions = []  # Список для хранения предсказаний (0 - качественное, 1 - некачественное)
+image_paths_to_move = []  # Список для хранения путей к изображениям
 # Создайте список путей к изображениям на основе предсказаний
-image_paths_to_move = [str(test_data.dataset.samples[i][0]) for i, prediction in enumerate(predictions)]
+#image_paths_to_move = [str(test_data.dataset.samples[i][0]) for i, prediction in enumerate(predictions)]
 
 with torch.no_grad():
-    for i, data in enumerate(test_data):  # Используем enumerate, чтобы получить индекс
+    for i, data in enumerate(test_data):
         images, labels = data
         outputs = net(images)
         _, predicted = torch.max(outputs.data, 1)
+        predictions.extend(predicted.tolist())  # Добавление предсказаний в список
+        # Получение пути к изображению
+        image_path = str(test_data.dataset.samples[i][0])
+        image_paths_to_move.append(image_path)
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
 
 print(f'Точность на тестовом наборе данных: {100 * correct / total}%')
 
 # Переместите изображения на основе предсказаний
-move_images(image_paths_to_move)
+move_images(predictions, image_paths_to_move)
