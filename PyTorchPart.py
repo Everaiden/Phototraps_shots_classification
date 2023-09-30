@@ -23,6 +23,8 @@ test_data = DataLoader(train_data, batch_size=32, shuffle=True)
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=32, shuffle=True)
 test_loader = DataLoader(test_data, batch_size=32, shuffle=True)
 
+image_paths = [sample[0] for sample in train_data.imgs]
+
 # Создание сверточной нейронной сети (CNN)
 class Net(nn.Module):
     def __init__(self):
@@ -51,7 +53,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 # Обучение модели
-for epoch in range(1):  # Пример: 1000 эпох
+for epoch in range(10):  # Пример: 1000 эпох
     running_loss = 0.0
     for i, data in enumerate(train_loader, 0):
         inputs, labels = data
@@ -74,7 +76,7 @@ if not os.path.exists('Trash'):
 # Функция для переноса изображений в соответствующие папки
 def move_images(predictions):
     for i, prediction in enumerate(predictions):
-        image_path = test_data.samples[i][0]  # Путь к изображению
+        image_path = [sample[0] for sample in train_data.imgs]  # Путь к изображению
         if prediction == 0:  # Предсказание: качественное
             shutil.copy(image_path, 'Useful')
         else:  # Предсказание: некачественное
@@ -84,6 +86,8 @@ def move_images(predictions):
 correct = 0
 total = 0
 predictions = []
+# Создайте список путей к изображениям на основе предсказаний
+image_paths_to_move = [str(test_data.dataset.samples[i][0]) for i, prediction in enumerate(predictions)]
 
 with torch.no_grad():
     for i, data in enumerate(test_data):  # Используем enumerate, чтобы получить индекс
@@ -92,12 +96,8 @@ with torch.no_grad():
         _, predicted = torch.max(outputs.data, 1)
         total += labels.size(0)
         correct += (predicted == labels).sum().item()
-        predictions.extend(predicted.tolist())
-
-        # Теперь получаем путь к изображению
-        image_path = train_data.samples[train_data.targets[i]][0]
 
 print(f'Точность на тестовом наборе данных: {100 * correct / total}%')
 
-# Перемещение изображений в соответствующие папки
-move_images(predictions)
+# Переместите изображения на основе предсказаний
+move_images(image_paths_to_move)
