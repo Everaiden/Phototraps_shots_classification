@@ -13,6 +13,7 @@ transform = transforms.Compose([transforms.Resize((128, 128)),
 
 #train_data = datasets.ImageFolder("E:\Python\Phototraps_shots_classification\Classes", transform=transform)
 #test_data = datasets.ImageFolder("E:\Python\Phototraps_shots_classification\Train", transform=transform)
+
 train_data = datasets.ImageFolder('E:\Python\Phototraps_shots_classification\Classes', transform=transform)
 test_data = DataLoader(train_data, batch_size=32, shuffle=True)
 
