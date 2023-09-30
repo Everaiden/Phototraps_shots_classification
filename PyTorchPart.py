@@ -6,6 +6,9 @@ import torch.optim as optim
 from torchvision import transforms, datasets
 from torch.utils.data import DataLoader
 import torchvision.transforms.functional as F
+from PIL import Image, ImageFile
+ImageFile.LOAD_TRUNCATED_IMAGES = True
+
 
 # Предварительная обработка данных и загрузка
 transform = transforms.Compose([transforms.Resize((128, 128)),
@@ -14,7 +17,7 @@ transform = transforms.Compose([transforms.Resize((128, 128)),
 #train_data = datasets.ImageFolder("E:\Python\Phototraps_shots_classification\Classes", transform=transform)
 #test_data = datasets.ImageFolder("E:\Python\Phototraps_shots_classification\Train", transform=transform)
 
-train_data = datasets.ImageFolder('E:\Python\Phototraps_shots_classification\Classes', transform=transform)
+train_data = datasets.ImageFolder('.\Classes', transform=transform)
 test_data = DataLoader(train_data, batch_size=32, shuffle=True)
 
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=32, shuffle=True)
@@ -27,12 +30,12 @@ class Net(nn.Module):
         self.conv1 = nn.Conv2d(3, 32, 3)
         self.pool = nn.MaxPool2d(2, 2)
         self.fc1 = nn.Linear(32 * 30 * 30, 128)
-        self.fc2 = nn.Linear(128, 2)  # Два класса: качественные и некачественные
+        self.fc2 = nn.Linear(128, 2)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = x.view(-1, 32 * 30 * 30)
-        x = F.relu(self.fc1(x))
+        x = self.pool(torch.nn.functional.relu(self.conv1(x)))
+        x = x.view(x.size(0), -1)
+        x = torch.nn.functional.relu(self.fc1(x))
         x = self.fc2(x)
         return x
 
