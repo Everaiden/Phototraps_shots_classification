@@ -53,7 +53,7 @@ criterion = nn.CrossEntropyLoss()
 optimizer = optim.Adam(net.parameters(), lr=0.001)
 
 # Обучение модели
-for epoch in range(1):  # Пример: 1000 эпох
+for epoch in range(10):  # Пример: 1000 эпох
     running_loss = 0.0
     for i, data in enumerate(train_loader, 0):
         inputs, labels = data
@@ -90,16 +90,16 @@ image_paths_to_move = []  # Список для хранения путей к �
 #image_paths_to_move = [str(test_data.dataset.samples[i][0]) for i, prediction in enumerate(predictions)]
 
 with torch.no_grad():
-    for i, data in enumerate(test_data):
-        images, labels = data
-        outputs = net(images)
+    for image_path, label in train_data.samples:
+        image = Image.open(image_path)
+        image = transform(image).unsqueeze(0)  # Преобразование и добавление размерности батча
+        label = torch.tensor([label])  # Преобразование в тензор
+        outputs = net(image)
         _, predicted = torch.max(outputs.data, 1)
         predictions.extend(predicted.tolist())  # Добавление предсказаний в список
-        # Получение пути к изображению
-        image_path = str(test_data.dataset.samples[i][0])
         image_paths_to_move.append(image_path)
-        total += labels.size(0)
-        correct += (predicted == labels).sum().item()
+        total += label.size(0)
+        correct += (predicted == label).sum().item()
 
 print(f'Точность на тестовом наборе данных: {100 * correct / total}%')
 
