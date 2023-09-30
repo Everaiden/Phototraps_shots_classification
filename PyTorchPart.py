@@ -4,17 +4,20 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from torchvision import transforms, datasets
+from torch.utils.data import DataLoader
 import torchvision.transforms.functional as F
 
 # Предварительная обработка данных и загрузка
 transform = transforms.Compose([transforms.Resize((128, 128)),
                                 transforms.ToTensor()])
 
-train_data = datasets.ImageFolder("E:\Python\Phototraps_shots_classification\Classes", transform=transform)
-test_data = datasets.ImageFolder("E:\Python\Phototraps_shots_classification\Train", transform=transform)
+#train_data = datasets.ImageFolder("E:\Python\Phototraps_shots_classification\Classes", transform=transform)
+#test_data = datasets.ImageFolder("E:\Python\Phototraps_shots_classification\Train", transform=transform)
+train_data = datasets.ImageFolder('E:\Python\Phototraps_shots_classification\Classes', transform=transform)
+test_data = DataLoader(train_data, batch_size=32, shuffle=True)
 
 train_loader = torch.utils.data.DataLoader(train_data, batch_size=32, shuffle=True)
-test_loader = torch.utils.data.DataLoader(test_data, batch_size=32, shuffle=False)
+test_loader = DataLoader(test_data, batch_size=32, shuffle=True)
 
 # Создание сверточной нейронной сети (CNN)
 class Net(nn.Module):
