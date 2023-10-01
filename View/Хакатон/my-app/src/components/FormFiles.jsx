@@ -1,12 +1,19 @@
 import React from 'react'
-import {Form} from 'react-bootstrap'
+import {Button, Form} from 'react-bootstrap'
 
 const FormFiles = () => {
   return (
-    <Form.Group controlId="formFileMultiple">
-      <Form.Label>Вставьте изображение</Form.Label>
-      <Form.Control type="file"/>
-    </Form.Group>
+    <div id='FormFiles'>
+      <Form.Group controlId="formFileMultiple">
+        <Form.Label />
+        <Form.Control type="file"/>
+        <div className="d-grid gap-2">
+          <Button variant="primary" size="lg">
+            Запуск
+          </Button>
+        </div>
+      </Form.Group>
+    </div>
 )}
 
 export default FormFiles

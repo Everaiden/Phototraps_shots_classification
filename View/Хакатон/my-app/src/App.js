@@ -11,7 +11,7 @@ const App = () => {
       <Header />
       <main>
         <Container>
-          <h1>SOSники</h1>
+          <h1>Классификация снимков с фотоловушек</h1>
           <Row>
             <Col className="col-8">
               <Slider />
