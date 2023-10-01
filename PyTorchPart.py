@@ -52,7 +52,6 @@ class Net(nn.Module):
         else:
             self.fc1 = nn.Linear(127008, 128)
 
-
     def forward(self, x):
         x = self.pool(torch.nn.functional.relu(self.conv1(x)))
         x = x.view(x.size(0), -1)
@@ -108,8 +107,6 @@ correct = 0
 total = 0
 predictions = []  # Список для хранения предсказаний (0 - качественное, 1 - некачественное)
 image_paths_to_move = []  # Список для хранения путей к изображениям
-# Создайте список путей к изображениям на основе предсказаний
-#image_paths_to_move = [str(test_data.dataset.samples[i][0]) for i, prediction in enumerate(predictions)]
 
 with torch.no_grad():
     for image_path, label in train_data.samples:
